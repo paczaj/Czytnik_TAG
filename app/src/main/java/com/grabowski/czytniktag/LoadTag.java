@@ -1,6 +1,8 @@
 package com.grabowski.czytniktag;
 
 import android.graphics.Color;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,8 @@ public class LoadTag extends Fragment {
                 btn.setBackgroundColor(Color.RED);
             }
         });
+
+
 
         return  rootView;
     }
