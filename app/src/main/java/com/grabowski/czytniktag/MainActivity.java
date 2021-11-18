@@ -3,6 +3,8 @@ package com.grabowski.czytniktag;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
@@ -14,6 +16,8 @@ import com.google.android.material.tabs.TabLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +25,8 @@ import android.widget.Toast;
 
 import com.grabowski.czytniktag.ui.main.SectionsPagerAdapter;
 import com.grabowski.czytniktag.databinding.ActivityMainBinding;
+
+import java.io.UnsupportedEncodingException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -80,7 +86,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         // If the intent caught is a NFC tag, handle it
-        Toast.makeText(this, "NFC INTENT", Toast.LENGTH_SHORT).show();
+
+        if (intent.hasExtra(NfcAdapter.EXTRA_TAG)) {
+            //Toast.makeText(this, "NFC INTENT", Toast.LENGTH_SHORT).show();
+            Parcelable[] parcelables = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+                if(parcelables != null && parcelables.length > 0){
+                    readTextFromMessage((NdefMessage) parcelables[0]);
+                    Toast.makeText(this, "NDEF MSG FOUND", Toast.LENGTH_SHORT).show();
+                }else{            
+                    Toast.makeText(this, "No NDEF messages found!", Toast.LENGTH_SHORT).show();
+                }            
+            
+
+        }
         super.onNewIntent(intent);
     }
 
@@ -101,5 +119,28 @@ public class MainActivity extends AppCompatActivity {
         nfcAdapter.disableForegroundDispatch(this);
 
         super.onPause();
+    }
+
+    private void readTextFromMessage(NdefMessage ndefMessage){
+        NdefRecord[] ndefRecords = ndefMessage.getRecords();
+
+        if (ndefRecords != null && ndefRecords.length > 0){
+            NdefRecord ndefRecord = ndefRecords[0];
+            String tagContent = getTextFromNdefRecord(ndefRecord);
+            Toast.makeText(this, tagContent, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public String getTextFromNdefRecord(NdefRecord ndefRecord){
+        String tagContent = null;
+        try {
+            byte[] payload = ndefRecord.getPayload();
+            String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16";
+            int languageSize = payload[0] & 0063;
+            tagContent = new String(payload, languageSize + 1, payload.length - languageSize - 1, textEncoding);
+        } catch (UnsupportedEncodingException e){
+            Log.e("getTextFromNdefRecord", e.getMessage(), e);
+        }
+        return tagContent;
     }
 }
