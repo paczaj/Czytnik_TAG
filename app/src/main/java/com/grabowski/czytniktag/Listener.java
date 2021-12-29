@@ -16,11 +16,13 @@ public interface Listener {
     //bez sensu trzeba zrobić w main override
     void setWriteMode(int x);
 
-    NdefMessage createNdefMessage(String content);
-    void writeNdefMessage(Tag tag, NdefMessage ndefMessage);
+    //NdefMessage createNdefMessage(String content);
+    //void writeNdefMessage(Tag tag, NdefMessage ndefMessage);
 
     void setPhoneNumber(String x);
     void setTextMessage(String x);
     void setWebLink(String protocol, String webLink);
     void setVcard(String name, String surname, String organisation, String telephone, String email);
+    void setText(String text);
+    void setAddressMaps(String address);
 }

@@ -18,22 +18,6 @@ public class LoadTag extends Fragment {
     Button btn;
     TextView resultTag;
 
-//    @Override
-//    public void setUserVisibleHint(boolean isVisibleToUser) {
-//        super.setUserVisibleHint(isVisibleToUser);
-//        if (isResumed() && isVisibleToUser) {
-//            ((MainActivity)getActivity()).setActualView(1);
-//            //Log.d("ACTUAL_FR", "SAVE");
-//        }
-//    }
-//
-//    @Override
-//    public void onDestroyView(){
-//        super.onDestroyView();
-//        getFragmentManager().beginTransaction().remove(this).commitAllowingStateLoss();
-//        //Log.d("ACTUAL_FR", "DESTROY LOAD");
-//    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.load_tag, container, false);
