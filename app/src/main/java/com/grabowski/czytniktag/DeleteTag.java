@@ -3,6 +3,7 @@ package com.grabowski.czytniktag;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,22 +16,6 @@ public class DeleteTag extends Fragment {
 
     Button delBtn;
 
-//    @Override
-//    public void setUserVisibleHint(boolean isVisibleToUser) {
-//        super.setUserVisibleHint(isVisibleToUser);
-//        if (isVisibleToUser) {
-//            ((MainActivity)getActivity()).setActualView(2);
-//            //Log.d("ACTUAL_FR", "DELETE");
-//        }
-//    }
-
-//    @Override
-//    public void onDestroyView(){
-//        super.onDestroyView();
-//        //getFragmentManager().beginTransaction().remove(this).commitAllowingStateLoss();
-//        //Log.d("ACTUAL_FR", "DESTROY DELETE");
-//    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.delete_tag, container, false);
@@ -41,21 +26,41 @@ public class DeleteTag extends Fragment {
 
                 ((MainActivity)getActivity()).onDisplayDialog();
 
-                AlertDialog.Builder alertScanTag = new AlertDialog.Builder(getActivity())
-                        .setTitle("Kasowanie zawartości TAG")
+                AlertDialog alertDelete = new AlertDialog.Builder(getActivity())
+                        .setTitle("Skasuj zawartość z TAG")
                         .setMessage("Przyłóż TAG, aby skasować zawartość")
-                        .setCancelable(false);
-                alertScanTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                        .setCancelable(false)
+                        .setNegativeButton(android.R.string.no, null)
+                        .create();
+                alertDelete.setOnShowListener(new DialogInterface.OnShowListener() {
+
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ((MainActivity)getActivity()).onDialogDismissed();
-                            dialog.cancel();
+                    public void onShow(final DialogInterface dialog) {
+                        final Button defaultButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE);
+                        defaultButton.setText("Anuluj");
+                        new CountDownTimer(60000, 500) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+
+                                if (((MainActivity) getActivity()).isReadDone() == true) {
+                                    onFinish();
+                                    ((MainActivity) getActivity()).offReadDone();
+                                    ((MainActivity) getActivity()).onDialogDismissed();
+                                }
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                if (alertDelete.isShowing()) {
+                                    alertDelete.dismiss();
+                                }
+                            }
+                        }.start();
                     }
                 });
-                alertScanTag.show();
+                alertDelete.show();
             }
         });
-
         return  rootView;
     }
 }

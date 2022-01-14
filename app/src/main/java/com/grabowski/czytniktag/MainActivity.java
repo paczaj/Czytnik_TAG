@@ -33,30 +33,38 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements Listener {
+public class MainActivity extends AppCompatActivity {
 
     TabLayout tabLayout;
     ViewPager2 pager2;
     FragmentAdapter adapter;
 
     //Intialize attributes for NFC
-    NfcAdapter nfcAdapter;
-    boolean isDialogDisplayed = false;
-    String tagResultScan = null;
-    int numberOfFragment = 0;
-    int writeMode = 0;
+    private NfcAdapter nfcAdapter;
+    private boolean isDialogDisplayed = false;
+    private int numberOfFragment = 0;
+    private int writeMode = 0;
+    private boolean isReadDone = false;
 
     //Variable SaveTag
-    String phoneNumber;
-    String textMessage;
-    String webLink;
-    String protocol;
-    String name;
-    String surname;
-    String organisation;
-    String email;
-    String textMultiline;
-    String address;
+    private String phoneNumber;
+    private String textMessage;
+    private String webLink;
+    private String protocol;
+    private String name;
+    private String surname;
+    private String organisation;
+    private String email;
+    private String textMultiline;
+    private String address;
+
+    //Variable LoadTag
+    private String idTag;
+    private String typeTag;
+    private Ndef ndefTag;
+    private String sizeTag;
+    private boolean writable;
+    private String textOnTag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements Listener {
             public void onTabSelected(TabLayout.Tab tab) {
                 pager2.setCurrentItem(tab.getPosition());
 
-                //Ustala na jakiej karcie aktualie user jest, TAG jest wykonywany jak powinien być
+                //Ustala na jakiej karcie aktualnie user jest, TAG jest wykonywany jak powinien być
                 setActualView(tab.getPosition());
                 //Log.d("ACTUAL_FR", "POSITION" + tab.getPosition());
             }
@@ -99,17 +107,6 @@ public class MainActivity extends AppCompatActivity implements Listener {
             }
         });
 
-//        Email Button
-//        FloatingActionButton fab = binding.fab;
-//
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-
         //Initialise NfcAdapter
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -127,64 +124,75 @@ public class MainActivity extends AppCompatActivity implements Listener {
         // If the intent caught is a NFC tag, handle it
 
         if (intent.hasExtra(NfcAdapter.EXTRA_TAG)) {
-            vibration();
-
-            //Operacja usuwania
-            if (numberOfFragment == 2 && isDialogDisplayed == true) {
-                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-//                NdefMessage ndefMessage = createNdefMessage("");
-//                writeNdefMessage(tag, ndefMessage);
-
-                Toast.makeText(this, "Kasowanie TAG", Toast.LENGTH_SHORT).show();
-            }
 
             //operacja odczytu
             if (numberOfFragment == 0 && isDialogDisplayed == true) {
+                vibration();
+                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
                 Parcelable[] parcelables = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-                if (parcelables != null && parcelables.length > 0) {
-                    readTextFromMessage((NdefMessage) parcelables[0]);
-                    Toast.makeText(this, "Zeskanowano", Toast.LENGTH_SHORT).show();
+
+                idTag = byteArrayToHexString(tag.getId());
+                ndefTag = Ndef.get(tag);
+                sizeTag = String.valueOf(ndefTag.getMaxSize()) + " Bytes";
+                writable = ndefTag.isWritable();
+                typeTag = ndefTag.getType();
+
+                if (parcelables != null && parcelables.length > 0 ) {
+                    textOnTag = FunctionNFC.readTextFromMessage((NdefMessage) parcelables[0]);
+                    int sizeByteTextOnTag = textOnTag.getBytes().length;
+                    textOnTag = String.valueOf(sizeByteTextOnTag) + " bytes: " + textOnTag;
                 } else {
-                    Toast.makeText(this, "Brak treści w TAG", Toast.LENGTH_SHORT).show();
+                    textOnTag = "Brak treści";
                 }
+                //informacja o poprawnym odczytaniu
+                isReadDone = true;
             }
 
-            //Operacja zapisu
+            //Operacja zapisu - skończone
             if (numberOfFragment == 1 && isDialogDisplayed == true) {
+                vibration();
                 Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
                 switch (writeMode) {
                     case 0:
-                        writeText(tag, textMultiline);
+                        FunctionNFC.writeText(tag, textMultiline, this);
                         break;
                     case 1:
-                        writeSMS(tag, phoneNumber, textMessage);
+                        FunctionNFC.writeSMS(tag, phoneNumber, textMessage, this);
                         break;
                     case 2:
-                        writeNumberPhone(tag, phoneNumber);
+                        FunctionNFC.writeNumberPhone(tag, phoneNumber, this);
                         break;
                     case 3:
                         NdefRecord[] records = new NdefRecord[1];
                         try {
-                            records[0] = createVcardRecord(name, surname, organisation, phoneNumber, email);
+                            records[0] = FunctionNFC.createVcardRecord(name, surname, organisation, phoneNumber, email);
                         } catch (UnsupportedEncodingException e) {
                         }
 
                         NdefMessage contactMessage = new NdefMessage(records);
-                        writeContact(tag, contactMessage);
+                        FunctionNFC.writeContact(tag, contactMessage, this);
                         break;
                     case 4:
-                        writeWebLink(tag, protocol, webLink);
+                        FunctionNFC.writeWebLink(tag, protocol, webLink, this);
                         break;
                     case 5:
-                        writeAdressGMaps(tag, address);
+                        FunctionNFC.writeAdressGMaps(tag, address, this);
                         break;
                     case 6:
-                        writeAdressMaps(tag, address);
-                        break;
-                    case 77:
+                        FunctionNFC.writeAdressMaps(tag, address, this);
                         break;
                 }
+            }
+
+            //Operacja usuwania - nieskończone
+            if (numberOfFragment == 2 && isDialogDisplayed == true) {
+                vibration();
+                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+                FunctionNFC.deleteMemTag(tag, this);
+
+                isReadDone = true;
+                Toast.makeText(this, "Kasowanie zawartości TAG zakończone", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -207,6 +215,12 @@ public class MainActivity extends AppCompatActivity implements Listener {
         super.onPause();
     }
 
+    @Override
+    public void onBackPressed() {
+            super.onBackPressed();
+            finish();
+    }
+
     //Wibracje po rozpoznaniu tag
     @SuppressLint("MissingPermission")
     private void vibration() {
@@ -218,246 +232,41 @@ public class MainActivity extends AppCompatActivity implements Listener {
         }
     }
 
-    //Zapis sms do tag
-    private void writeSMS(Tag tag, String phoneNumber, String textMessage) {
-        String smsUri = "sms:" + phoneNumber + "?body=" + textMessage;
-        NdefRecord smsUriRecord = NdefRecord.createUri(smsUri);
-        NdefMessage smsMessage = new NdefMessage(smsUriRecord);
+    //Konwertowanie na string
+    String byteArrayToHexString(byte[] inArray) {
+        int i, j, in;
+        String[] hex = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
+        String out = "";
 
-        Ndef ndef = Ndef.get(tag);
-        try {
-            ndef.connect();
-            ndef.writeNdefMessage(smsMessage);
-            ndef.close();
-            Toast.makeText(this, "Zapisano SMS TAG", Toast.LENGTH_SHORT).show();
-        } catch (IOException | FormatException e) {
-            Toast.makeText(this, "Błąd zapisu, ponów próbę", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+        for (j = 0; j < inArray.length; ++j) {
+            in = (int) inArray[j] & 0xff;
+            i = (in >> 4) & 0x0f;
+            out += hex[i];
+            i = in & 0x0f;
+            out += hex[i];
         }
+        return out;
     }
 
-    //Zapis linku do tag
-    private void writeWebLink(Tag tag, String protocol, String webLink) {
-        Uri uri = Uri.parse(protocol + webLink);
-        NdefRecord recordNFC = NdefRecord.createUri(uri);
-        NdefMessage webMessage = new NdefMessage(recordNFC);
-
-        Ndef ndef = Ndef.get(tag);
-        try {
-            ndef.connect();
-            ndef.writeNdefMessage(webMessage);
-            ndef.close();
-            Toast.makeText(this, "Zapisano Link WWW TAG", Toast.LENGTH_SHORT).show();
-        } catch (IOException | FormatException e) {
-            Toast.makeText(this, "Błąd zapisu, ponów próbę", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    //Zapis telefonu do tag
-    private void writeNumberPhone(Tag tag, String tel) {
-        String telUri = "tel:" + tel;
-        NdefRecord telUriRecord = NdefRecord.createUri(telUri);
-        NdefMessage telMessage = new NdefMessage(telUriRecord);
-
-        Ndef ndef = Ndef.get(tag);
-        try {
-            ndef.connect();
-            ndef.writeNdefMessage(telMessage);
-            ndef.close();
-            Toast.makeText(this, "Zapisano numer do TAG", Toast.LENGTH_SHORT).show();
-        } catch (IOException | FormatException e) {
-            Toast.makeText(this, "Błąd zapisu, ponów próbę", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    //Zapis kontaktu do tag
-    private void writeContact(Tag tag, NdefMessage message) {
-
-        Ndef ndef = Ndef.get(tag);
-        try {
-            ndef.connect();
-            ndef.writeNdefMessage(message);
-            ndef.close();
-            Toast.makeText(this, "Zapisano Kontakt TAG", Toast.LENGTH_SHORT).show();
-        } catch (IOException | FormatException e) {
-            Toast.makeText(this, "Błąd zapisu, ponów próbę", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    //Zapis do aplikacji maps do tag
-    private void writeAdressGMaps(Tag tag, String adress) {
-        String telUri = "google.navigation:q=" + adress;
-        NdefRecord telUriRecord = NdefRecord.createUri(telUri);
-        NdefMessage telMessage = new NdefMessage(telUriRecord);
-
-        Ndef ndef = Ndef.get(tag);
-        try {
-            ndef.connect();
-            ndef.writeNdefMessage(telMessage);
-            ndef.close();
-            Toast.makeText(this, "Zapisano Adres do TAG", Toast.LENGTH_SHORT).show();
-        } catch (IOException | FormatException e) {
-            Toast.makeText(this, "Błąd zapisu, ponów próbę", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    //Zapis do aplikacji maps do tag
-    private void writeAdressMaps(Tag tag, String adress) {
-        String telUri = "geo:0,0?q=" + adress;
-        NdefRecord telUriRecord = NdefRecord.createUri(telUri);
-        NdefMessage telMessage = new NdefMessage(telUriRecord);
-
-        Ndef ndef = Ndef.get(tag);
-        try {
-            ndef.connect();
-            ndef.writeNdefMessage(telMessage);
-            ndef.close();
-            Toast.makeText(this, "Zapisano Adres do TAG", Toast.LENGTH_SHORT).show();
-        } catch (IOException | FormatException e) {
-            Toast.makeText(this, "Błąd zapisu, ponów próbę", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    //Tworzy vcard, do kontaktów
-    public NdefRecord createVcardRecord(String name, String surname, String org, String tel, String email) throws UnsupportedEncodingException {
-        String payloadStr = "BEGIN:VCARD" + "\n" +
-                "VERSION:2.1" + "\n" +
-                "N:;" + surname + ";" + name + "\n" +
-                "ORG:" + org + "\n" +
-                "TEL:" + tel + "\n" +
-                "EMAIL:" + email + "\n" +
-                "END:VCARD";
-
-        byte[] uriField = payloadStr.getBytes(Charset.forName("US-ASCII"));
-        byte[] payload = new byte[uriField.length + 1];
-        System.arraycopy(uriField, 0, payload, 1, uriField.length);
-        NdefRecord nfcRecord = new NdefRecord(NdefRecord.TNF_MIME_MEDIA, "text/vcard".getBytes(), new byte[0], payload);
-
-        return nfcRecord;
-    }
-
-    private void readTextFromMessage(NdefMessage ndefMessage) {
-        NdefRecord[] ndefRecords = ndefMessage.getRecords();
-
-        if (ndefRecords != null && ndefRecords.length > 0) {
-            NdefRecord ndefRecord = ndefRecords[0];
-            String tagContent = getTextFromNdefRecord(ndefRecord);
-            Toast.makeText(this, tagContent, Toast.LENGTH_SHORT).show();
-            tagResultScan = tagContent;
-        }
-    }
-
-    public String getTextFromNdefRecord(NdefRecord ndefRecord) {
-        String tagContent = null;
-        try {
-            byte[] payload = ndefRecord.getPayload();
-            String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16";
-            int languageSize = payload[0] & 0063;
-            tagContent = new String(payload, languageSize + 1, payload.length - languageSize - 1, textEncoding);
-        } catch (UnsupportedEncodingException e) {
-            Log.e("getTextFromNdefRecord", e.getMessage(), e);
-        }
-        return tagContent;
-    }
-
-    //Usuwanie zawartości taga, nie do końca zrobione
-    private void formatTag(Tag tag, NdefMessage ndefMessage) {
-        try {
-            NdefFormatable ndefFormatable = NdefFormatable.get(tag);
-
-            if (ndefFormatable == null) {
-                Toast.makeText(this, "Tag is not ndef formatable", Toast.LENGTH_SHORT).show();
-            }
-
-            ndefFormatable.connect();
-            ndefFormatable.format(ndefMessage);
-            ndefFormatable.close();
-        } catch (Exception e) {
-            Log.e("formatTag", e.getMessage());
-        }
-    }
-
-    //Tworzenie wiadomości zrozumiały dla zapisu tag
-    private NdefRecord createTextRecord(String content) {
-        try {
-            byte[] language;
-            language = Locale.getDefault().getLanguage().getBytes("UTF-8");
-
-            final byte[] text = content.getBytes("UTF-8");
-            final int languageSize = language.length;
-            final int textLength = text.length;
-            final ByteArrayOutputStream payload = new ByteArrayOutputStream(1 + languageSize + textLength);
-
-            payload.write((byte) (languageSize & 0x1F));
-            payload.write(language, 0, languageSize);
-            payload.write(text, 0, textLength);
-
-            return new NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, new byte[0], payload.toByteArray());
-        } catch (UnsupportedEncodingException e) {
-            Log.e("createTextRecord", e.getMessage());
-        }
-        return null;
-    }
-
-    //Zapis wiadomości do tag
-    private void writeText(Tag tag, String text) {
-        NdefRecord ndefRecord = createTextRecord(text);
-        NdefMessage ndefMessage = new NdefMessage(new NdefRecord[]{ndefRecord});
-
-        try {
-            if (tag == null) {
-                Toast.makeText(this, "Brak TAG", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Ndef ndef = Ndef.get(tag);
-            if (ndef == null) {
-                formatTag(tag, ndefMessage);
-            } else {
-                ndef.connect();
-                if (!ndef.isWritable()) {
-                    Toast.makeText(this, "Błąd zapisu, ponów próbę", Toast.LENGTH_SHORT).show();
-                    ndef.close();
-                    return;
-                }
-
-                Toast.makeText(this, "Zapisano tekst TAG", Toast.LENGTH_SHORT).show();
-                ndef.writeNdefMessage(ndefMessage);
-                ndef.close();
-            }
-        } catch (Exception e) {
-            Log.e("writeNdefMessange", e.getMessage());
-        }
-    }
-
-    @Override
     public void onDisplayDialog() {
         isDialogDisplayed = true;
     }
 
-    @Override
     public void onDialogDismissed() {
         isDialogDisplayed = false;
     }
 
-    @Override
     public void setWriteMode(int x) {
         //0 - text
         //1 - sms
         //2 - telephone
         //3 - contact
         //4 - www
-        //5 - flash
+        //5 - GMaps
+        //6 - Maps
         writeMode = x;
     }
 
-    //Czy musi być w interfejsie jak tylko w main uzywany????
-    @Override
     public void setActualView(int x) {
         //0 - Load TAG
         //1 - Save TAG
@@ -465,23 +274,19 @@ public class MainActivity extends AppCompatActivity implements Listener {
         numberOfFragment = x;
     }
 
-    @Override
     public void setPhoneNumber(String x) {
         phoneNumber = x;
     }
 
-    @Override
     public void setTextMessage(String x) {
         textMessage = x;
     }
 
-    @Override
     public void setWebLink(String protocol, String webLink) {
         this.protocol = protocol;
         this.webLink = webLink;
     }
 
-    @Override
     public void setVcard(String name, String surname, String organisation, String phoneNumber, String email) {
         this.name = name;
         this.surname = surname;
@@ -490,13 +295,39 @@ public class MainActivity extends AppCompatActivity implements Listener {
         this.email = email;
     }
 
-    @Override
     public void setText(String textMultiline) {
         this.textMultiline = textMultiline;
     }
 
-    @Override
     public void setAddressMaps(String address) {
         this.address = address;
+    }
+
+    public void offReadDone() {
+        isReadDone = false;
+    }
+
+    public String getIdTag() {
+        return idTag;
+    }
+
+    public String getTypeTag() {
+        return typeTag;
+    }
+
+    public String getSizeTag() {
+        return sizeTag;
+    }
+
+    public boolean isWritable() {
+        return writable;
+    }
+
+    public boolean isReadDone() {
+        return isReadDone;
+    }
+
+    public String getTextOnTag() {
+        return textOnTag;
     }
 }

@@ -92,7 +92,7 @@ public class SaveTag extends Fragment {
         textTitle = rootView.findViewById(R.id.textTitleWrite);
         textTypeProtocol = rootView.findViewById(R.id.textProtocolType);
 //testowe
-        btn = rootView.findViewById(R.id.button);
+        btn = rootView.findViewById(R.id.btnReadTag);
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 //                Działa - pobiera jeżeli jest okienko, jezeli anuluj klikniete to false ustawia
@@ -149,14 +149,6 @@ public class SaveTag extends Fragment {
                                                     .setTitle("Zapisz Tekst do TAG/TAG'ów")
                                                     .setMessage("Przyłóż TAG, aby zapisać")
                                                     .setCancelable(false);
-
-                                            alertWriteTextTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    ((MainActivity) getActivity()).onDialogDismissed();
-                                                    dialog.cancel();
-                                                }
-                                            });
 
                                             alertWriteTextTag.setNeutralButton("Zamknij", new DialogInterface.OnClickListener() {
                                                 @Override
@@ -327,10 +319,10 @@ public class SaveTag extends Fragment {
                                     public void onClick(View v) {
                                         if (typeProtocol == "http://") {
                                             typeProtocol = "https://";
-                                            textTypeProtocol.setText("HTTPS");
+                                            textTypeProtocol.setText("Typ: HTTPS");
                                         } else {
                                             typeProtocol = "http://";
-                                            textTypeProtocol.setText("HTTP");
+                                            textTypeProtocol.setText("Typ: HTTP");
                                         }
                                     }
                                 });
