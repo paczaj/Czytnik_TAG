@@ -91,28 +91,28 @@ public class SaveTag extends Fragment {
 
         textTitle = rootView.findViewById(R.id.textTitleWrite);
         textTypeProtocol = rootView.findViewById(R.id.textProtocolType);
-//testowe
-        btn = rootView.findViewById(R.id.btnReadTag);
-        btn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-//                Działa - pobiera jeżeli jest okienko, jezeli anuluj klikniete to false ustawia
-                ((MainActivity) getActivity()).onDisplayDialog();
-                ((MainActivity) getActivity()).setWriteMode(77);
-
-                AlertDialog.Builder alertScanTag = new AlertDialog.Builder(getActivity())
-                        .setTitle("Zapisz TAG")
-                        .setMessage("Przyłóż TAG, aby zapisać zawartość")
-                        .setCancelable(false);
-                alertScanTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ((MainActivity) getActivity()).onDialogDismissed();
-                        dialog.cancel();
-                    }
-                });
-                alertScanTag.show();
-            }
-        });
+////testowe
+//        btn = rootView.findViewById(R.id.btnReadTag);
+//        btn.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+////                Działa - pobiera jeżeli jest okienko, jezeli anuluj klikniete to false ustawia
+//                ((MainActivity) getActivity()).onDisplayDialog();
+//                ((MainActivity) getActivity()).setWriteMode(77);
+//
+//                AlertDialog.Builder alertScanTag = new AlertDialog.Builder(getActivity())
+//                        .setTitle("Zapisz TAG")
+//                        .setMessage("Przyłóż TAG, aby zapisać zawartość")
+//                        .setCancelable(false);
+//                alertScanTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        ((MainActivity) getActivity()).onDialogDismissed();
+//                        dialog.cancel();
+//                    }
+//                });
+//                alertScanTag.show();
+//            }
+//        });
 
         btnSelectTypeWrite.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -190,14 +190,6 @@ public class SaveTag extends Fragment {
                                                     .setMessage("Przyłóż TAG, aby zapisać")
                                                     .setCancelable(false);
 
-                                            alertWriteSMSTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    ((MainActivity) getActivity()).onDialogDismissed();
-                                                    dialog.cancel();
-                                                }
-                                            });
-
                                             alertWriteSMSTag.setNeutralButton("Zamknij", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
@@ -236,14 +228,6 @@ public class SaveTag extends Fragment {
                                                     .setTitle("Zapisz Numer do TAG/TAGów")
                                                     .setMessage("Przyłóż TAG, aby zapisać")
                                                     .setCancelable(false);
-
-                                            alertWriteTelephoneTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    ((MainActivity) getActivity()).onDialogDismissed();
-                                                    dialog.cancel();
-                                                }
-                                            });
 
                                             alertWriteTelephoneTag.setNeutralButton("Zamknij", new DialogInterface.OnClickListener() {
                                                 @Override
@@ -286,14 +270,6 @@ public class SaveTag extends Fragment {
                                                     .setTitle("Zapisz Wizytówkę do TAG/TAGów")
                                                     .setMessage("Przyłóż TAG, aby zapisać")
                                                     .setCancelable(false);
-
-                                            alertWriteContactTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    ((MainActivity) getActivity()).onDialogDismissed();
-                                                    dialog.cancel();
-                                                }
-                                            });
 
                                             alertWriteContactTag.setNeutralButton("Zamknij", new DialogInterface.OnClickListener() {
                                                 @Override
@@ -347,14 +323,6 @@ public class SaveTag extends Fragment {
                                                     .setMessage("Przyłóż TAG, aby zapisać")
                                                     .setCancelable(false);
 
-                                            alertWriteWebLinkTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    ((MainActivity) getActivity()).onDialogDismissed();
-                                                    dialog.cancel();
-                                                }
-                                            });
-
                                             alertWriteWebLinkTag.setNeutralButton("Zamknij", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
@@ -397,14 +365,6 @@ public class SaveTag extends Fragment {
                                                     .setMessage("Przyłóż TAG, aby zapisać")
                                                     .setCancelable(false);
 
-                                            alertWriteGMapsTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    ((MainActivity) getActivity()).onDialogDismissed();
-                                                    dialog.cancel();
-                                                }
-                                            });
-
                                             alertWriteGMapsTag.setNeutralButton("Zamknij", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
@@ -445,14 +405,6 @@ public class SaveTag extends Fragment {
                                                     .setTitle("Zapisz Adres dla Aplikacji z Mapami do TAG/TAGów")
                                                     .setMessage("Przyłóż TAG, aby zapisać")
                                                     .setCancelable(false);
-
-                                            alertWriteMapsTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    ((MainActivity) getActivity()).onDialogDismissed();
-                                                    dialog.cancel();
-                                                }
-                                            });
 
                                             alertWriteMapsTag.setNeutralButton("Zamknij", new DialogInterface.OnClickListener() {
                                                 @Override
