@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment;
 
 public class LoadTag extends Fragment {
 
+    CountDownTimer timer;
+
     Button btnReadTag;
 
     TextView textIdTag;
@@ -35,7 +37,6 @@ public class LoadTag extends Fragment {
         btnReadTag = rootView.findViewById(R.id.btnReadTag);
         btnReadTag.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-//                Działa - pobiera jeżeli jest okienko, jezeli anuluj klikniete to false ustawia
                 ((MainActivity) getActivity()).onDisplayDialog();
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -52,7 +53,7 @@ public class LoadTag extends Fragment {
 
                 final AlertDialog alertScan = builder.create();
                 alertScan.show();
-                new CountDownTimer(60000, 500) {
+                timer = new CountDownTimer(60000, 500) {
                     @Override
                     public void onTick(long l) {
                         if (((MainActivity) getActivity()).isReadDone() == true) {
@@ -61,21 +62,23 @@ public class LoadTag extends Fragment {
                             textSizeTag.setText(((MainActivity) getActivity()).getSizeTag());
                             textMessageTag.setText(((MainActivity) getActivity()).getTextOnTag());
                             if (((MainActivity) getActivity()).isWritable() == true) {
-                                textWritableTag.setText("Możliwy ponowny zapis");
+                                textWritableTag.setText("Ponowny zapis możliwy");
                             } else {
                                 textWritableTag.setText("Zapis zablokowany");
                             }
                             ((MainActivity) getActivity()).offReadDone();
                             ((MainActivity) getActivity()).onDialogDismissed();
-                            cancel();
-                            alertScan.cancel();
+                            onFinish();
+                            timer.cancel();
                         }
                     }
                     @Override
                     public void onFinish() {
-                        alertScan.cancel();
+                        alertScan.dismiss();
+
                     }
-                }.start();
+                };
+                timer.start();
             }
         });
 

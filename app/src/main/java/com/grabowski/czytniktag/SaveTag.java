@@ -15,8 +15,6 @@ import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
 
 public class SaveTag extends Fragment {
-    //pierwsze testowe
-    Button btn;
 
     Button btnSelectTypeWrite;
     Button btnSMSWrite;
@@ -91,28 +89,6 @@ public class SaveTag extends Fragment {
 
         textTitle = rootView.findViewById(R.id.textTitleWrite);
         textTypeProtocol = rootView.findViewById(R.id.textProtocolType);
-////testowe
-//        btn = rootView.findViewById(R.id.btnReadTag);
-//        btn.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-////                Działa - pobiera jeżeli jest okienko, jezeli anuluj klikniete to false ustawia
-//                ((MainActivity) getActivity()).onDisplayDialog();
-//                ((MainActivity) getActivity()).setWriteMode(77);
-//
-//                AlertDialog.Builder alertScanTag = new AlertDialog.Builder(getActivity())
-//                        .setTitle("Zapisz TAG")
-//                        .setMessage("Przyłóż TAG, aby zapisać zawartość")
-//                        .setCancelable(false);
-//                alertScanTag.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        ((MainActivity) getActivity()).onDialogDismissed();
-//                        dialog.cancel();
-//                    }
-//                });
-//                alertScanTag.show();
-//            }
-//        });
 
         btnSelectTypeWrite.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,7 +101,6 @@ public class SaveTag extends Fragment {
                 alertSelectTypeTag.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //Aby działało chowanie i pokazywanie, trzeba przypisać do zmiennych elementy wyżej w kodzie
                         clearAllGroups();
 
                         switch (which) {
@@ -182,8 +157,6 @@ public class SaveTag extends Fragment {
 
                                             ((MainActivity) getActivity()).onDisplayDialog();
                                             ((MainActivity) getActivity()).setWriteMode(1);
-
-                                            //PLAN NA ZAPISANIE - POBRAC W INTENT POTRZEBNE WARTOSCI ZE ZMIENNYCH PODCZAS INTERAKCJI Z TAG NFC, ON WIE, CO MA ROBIC, CZYLI NIE WYWALI SIE
 
                                             AlertDialog.Builder alertWriteSMSTag = new AlertDialog.Builder(getActivity())
                                                     .setTitle("Zapisz SMS do TAG/TAGów")
@@ -287,7 +260,6 @@ public class SaveTag extends Fragment {
                             case 4: //Adres sieciowy
                                 textTitle.setText("Link do strony internetowej");
                                 groupWebLink.setVisibility(View.VISIBLE);
-                                //niepodoba mi się robienie globalnej z tym http
                                 typeProtocol = "http://";
 
                                 btnChangeTypeProtocol.setOnClickListener(new View.OnClickListener() {
@@ -315,8 +287,6 @@ public class SaveTag extends Fragment {
                                             ((MainActivity) getActivity()).setWebLink(typeProtocol, webLink);
                                             ((MainActivity) getActivity()).onDisplayDialog();
                                             ((MainActivity) getActivity()).setWriteMode(4);
-
-                                            //PLAN NA ZAPISANIE - POBRAC W INTENT POTRZEBNE WARTOSCI ZE ZMIENNYCH PODCZAS INTERAKCJI Z TAG NFC, ON WIE, CO MA ROBIC, CZYLI NIE WYWALI SIE
 
                                             AlertDialog.Builder alertWriteWebLinkTag = new AlertDialog.Builder(getActivity())
                                                     .setTitle("Zapisz Link TAG")

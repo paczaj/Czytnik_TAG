@@ -1,6 +1,7 @@
 package com.grabowski.czytniktag;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,8 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.view.MotionEvent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -99,10 +102,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Initialise NfcAdapter
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
-        //If no NfcAdapter, display that the device has no NFC
         if (nfcAdapter == null) {
             Toast.makeText(this, "Twoje urządzenie nie wspiera NFC!",
                     Toast.LENGTH_SHORT).show();
@@ -113,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        // If the intent caught is a NFC tag, handle it
 
         if (intent.hasExtra(NfcAdapter.EXTRA_TAG)) {
 
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 isReadDone = true;
             }
 
-            //Operacja zapisu - skończone
+            //Operacja zapisu
             if (numberOfFragment == 1 && isDialogDisplayed == true) {
                 vibration();
                 Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
@@ -177,14 +177,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            //Operacja usuwania - nieskończone
+            //Operacja usuwania
             if (numberOfFragment == 2 && isDialogDisplayed == true) {
                 vibration();
                 Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
                 FunctionNFC.deleteMemTag(tag, this);
 
                 isReadDone = true;
-                Toast.makeText(this, "Kasowanie zawartości TAG zakończone", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -222,6 +221,15 @@ public class MainActivity extends AppCompatActivity {
         } else {
             v.vibrate(250);
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (getCurrentFocus() != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     //Konwertowanie na string

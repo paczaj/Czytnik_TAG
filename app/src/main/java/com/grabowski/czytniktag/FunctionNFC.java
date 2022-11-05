@@ -163,9 +163,6 @@ public class FunctionNFC {
             NdefRecord ndefRecord = ndefRecords[0];
             String tagContent = getTextFromNdefRecord(ndefRecord);
             Log.d("readTextFromMSG", tagContent);
-//            if (tagContent == null){
-//                tagContent = "BRAK TREŚCI";
-//            }
             return tagContent;
         } else {
             return "brak";
@@ -208,38 +205,6 @@ public class FunctionNFC {
         }
         return null;
     }
-
-    //Zapis wiadomości do tag
-//    private void writeText(Tag tag, String text, Context context) {
-//        NdefRecord ndefRecord = createTextRecord(text);
-//        NdefMessage ndefMessage = new NdefMessage(new NdefRecord[]{ndefRecord});
-//
-//        try {
-//            if (tag == null) {
-//                Toast.makeText(context, "Brak TAG", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//
-//            Ndef ndef = Ndef.get(tag);
-//            if (ndef == null) {
-//                formatTag(tag);
-//                //formatTag(tag, ndefMessage);
-//            } else {
-//                ndef.connect();
-//                if (!ndef.isWritable()) {
-//                    Toast.makeText(context, "Błąd zapisu, ponów próbę", Toast.LENGTH_SHORT).show();
-//                    ndef.close();
-//                    return;
-//                }
-//
-//                Toast.makeText(context, "Zapisano tekst TAG", Toast.LENGTH_SHORT).show();
-//                ndef.writeNdefMessage(ndefMessage);
-//                ndef.close();
-//            }
-//        } catch (Exception e) {
-//            Log.e("writeNdefMessange", e.getMessage());
-//        }
-//    }
 
     //usuwanie zawartości tag
     public static void deleteMemTag(Tag tag, Context context) {

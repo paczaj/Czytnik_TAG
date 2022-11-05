@@ -13,14 +13,15 @@ import androidx.fragment.app.Fragment;
 
 public class DeleteTag extends Fragment {
 
-    Button delBtn;
+    CountDownTimer timer;
+    Button delBtnTag;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.delete_tag, container, false);
-        delBtn = rootView.findViewById(R.id.delBtn);
+        delBtnTag = rootView.findViewById(R.id.delBtn);
 
-        delBtn.setOnClickListener(new View.OnClickListener() {
+        delBtnTag.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
                 ((MainActivity)getActivity()).onDisplayDialog();
@@ -29,7 +30,13 @@ public class DeleteTag extends Fragment {
                         .setTitle("Skasuj zawartość z TAG")
                         .setMessage("Przyłóż TAG, aby skasować zawartość")
                         .setCancelable(false)
-                        .setNegativeButton(android.R.string.no, null)
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ((MainActivity) getActivity()).onDialogDismissed();
+                                dialogInterface.cancel();
+                            }
+                        })
                         .create();
                 alertDelete.setOnShowListener(new DialogInterface.OnShowListener() {
 
@@ -37,14 +44,15 @@ public class DeleteTag extends Fragment {
                     public void onShow(final DialogInterface dialog) {
                         final Button defaultButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE);
                         defaultButton.setText("Anuluj");
-                        new CountDownTimer(60000, 500) {
+                        timer = new CountDownTimer(60000, 500) {
                             @Override
                             public void onTick(long millisUntilFinished) {
 
                                 if (((MainActivity) getActivity()).isReadDone() == true) {
-                                    onFinish();
                                     ((MainActivity) getActivity()).offReadDone();
                                     ((MainActivity) getActivity()).onDialogDismissed();
+                                    onFinish();
+                                    timer.cancel();
                                 }
                             }
 
@@ -54,7 +62,8 @@ public class DeleteTag extends Fragment {
                                     alertDelete.dismiss();
                                 }
                             }
-                        }.start();
+                        };
+                        timer.start();
                     }
                 });
                 alertDelete.show();
